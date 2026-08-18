@@ -31,7 +31,7 @@ class TaskDto {
   }
 
   /// TaskDtoクラスからTaskクラスを生成するためのインスタンスメソッド
-  /// 
+  ///
   /// ドメインモデルに変換する時に使用します。
   /// ViewModelはDtoのことを知らなくていいので、Data層で変換。
   Task toDomain() {
