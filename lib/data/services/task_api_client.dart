@@ -52,15 +52,29 @@ class TaskApiClient {
   //あとでUIから「次の通信を失敗させる」ために使う。
   bool shouldFail = false;
 
-  /// 模擬的にAPIからデータを取得するメソッド。
+  /// 模擬的にAPIから一覧用のデータを取得するメソッド。
   Future<List<TaskDto>> fetchTasks() async {
     await _waitCommunication();
+
     // このクラスでは追加・削除もするので、_tasksをコピーして返す。
     return List<TaskDto>.from(_tasks);
   }
-  
+
+  /// idを受け取り、一覧から該当するTaskDtoを返すメソッド。
+  Future<TaskDto> fetchTask(String id) async {
+    await _waitCommunication();
+
+    final task = _tasks.where((task) => task.id == id).firstOrNull;
+
+    if (task != null) {
+      return task;
+    } else {
+      throw Exception('$idはありませんでした');
+    }
+  }
+
   /// 模擬通信固有の処理を共通化。
-  /// 
+  ///
   /// - 300ms待つ
   /// - shouldFailがtrueの場合Exceptionを投げる
   Future<void> _waitCommunication() async {
