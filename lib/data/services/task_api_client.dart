@@ -53,15 +53,20 @@ class TaskApiClient {
   bool shouldFail = false;
 
   /// 模擬的にAPIからデータを取得するメソッド。
-  ///
-  /// 300ms遅延させて通信しているように見せる。
-  /// また、例外が発生した場合の振る舞いも用意したいので、[shouldFail]で条件分岐させています。
   Future<List<TaskDto>> fetchTasks() async {
+    await _waitCommunication();
+    // このクラスでは追加・削除もするので、_tasksをコピーして返す。
+    return List<TaskDto>.from(_tasks);
+  }
+  
+  /// 模擬通信固有の処理を共通化。
+  /// 
+  /// - 300ms待つ
+  /// - shouldFailがtrueの場合Exceptionを投げる
+  Future<void> _waitCommunication() async {
     await Future.delayed(Duration(milliseconds: 300));
     if (shouldFail) {
       throw Exception('通信に失敗しました');
     }
-    // このクラスでは追加・削除もするので、_tasksをコピーして返す。
-    return List<TaskDto>.from(_tasks);
   }
 }
