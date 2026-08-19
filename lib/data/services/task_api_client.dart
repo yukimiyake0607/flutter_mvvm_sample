@@ -69,7 +69,7 @@ class TaskApiClient {
     if (task != null) {
       return task;
     } else {
-      throw Exception('$idはありませんでした');
+      throw Exception('$idは存在しませんでした');
     }
   }
 
@@ -102,7 +102,7 @@ class TaskApiClient {
 
     final taskNum = _tasks.indexWhere((taskDto) => taskDto.id == dto.id);
     if (taskNum == -1) {
-      throw Exception('${dto.id}はありませんでした');
+      throw Exception('${dto.id}は存在しませんでした');
     }
 
     _tasks[taskNum] = dto;
@@ -116,7 +116,7 @@ class TaskApiClient {
 
     final taskNum = _tasks.indexWhere((taskDto) => taskDto.id == id);
     if (taskNum == -1) {
-      throw Exception('$idはありませんでした');
+      throw Exception('$idは存在しませんでした');
     }
 
     _tasks.removeAt(taskNum);
