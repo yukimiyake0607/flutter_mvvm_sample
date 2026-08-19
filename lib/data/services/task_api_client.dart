@@ -73,6 +73,55 @@ class TaskApiClient {
     }
   }
 
+  /// TaskDtoを作成するメソッド。
+  Future<TaskDto> createTask({
+    required String title,
+    required String note,
+  }) async {
+    await _waitCommunication();
+
+    // 同じ「今」にしたいので、明確に指定
+    final now = DateTime.now();
+
+    final taskDto = TaskDto(
+      id: now.toString(),
+      title: title,
+      body: note,
+      completed: false,
+      createdAt: now,
+    );
+
+    _tasks.add(taskDto);
+
+    return taskDto;
+  }
+
+  // /// TaskDtoを更新するメソッド。存在しなければ例外を投げます。
+  // Future<TaskDto> updateTask(TaskDto dto) async {
+  //   await _waitCommunication();
+
+  //   final task = _tasks.where((task) => task.id == dto.id).firstOrNull;
+  //   if (task == null) {
+  //     throw Exception('${dto.id}はありませんでした');
+  //   }
+
+  //   _tasks.map((taskDto) => taskDto.id == task.id ? taskDto = task : null);
+
+  //   return task;
+  // }
+
+  // /// 該当するTaskDtoを削除します。存在しなければ例外を投げます。
+  // Future<void> deleteTask(String id) async {
+  //   await _waitCommunication();
+
+  //   final task = _tasks.where((taskDto) => taskDto.id == id).firstOrNull;
+  //   if (task == null) {
+  //     throw Exception('$idはありませんでした');
+  //   }
+
+  //   _tasks.where((taskDto) => taskDto.id != task.id).toList();
+  // }
+
   /// 模擬通信固有の処理を共通化。
   ///
   /// - 300ms待つ
