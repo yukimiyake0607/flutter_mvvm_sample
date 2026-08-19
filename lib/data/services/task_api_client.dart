@@ -96,31 +96,31 @@ class TaskApiClient {
     return taskDto;
   }
 
-  // /// TaskDtoを更新するメソッド。存在しなければ例外を投げます。
-  // Future<TaskDto> updateTask(TaskDto dto) async {
-  //   await _waitCommunication();
+  /// TaskDtoを更新するメソッド。存在しなければ例外を投げます。
+  Future<TaskDto> updateTask(TaskDto dto) async {
+    await _waitCommunication();
 
-  //   final task = _tasks.where((task) => task.id == dto.id).firstOrNull;
-  //   if (task == null) {
-  //     throw Exception('${dto.id}はありませんでした');
-  //   }
+    final taskNum = _tasks.indexWhere((taskDto) => taskDto.id == dto.id);
+    if (taskNum == -1) {
+      throw Exception('${dto.id}はありませんでした');
+    }
 
-  //   _tasks.map((taskDto) => taskDto.id == task.id ? taskDto = task : null);
+    _tasks[taskNum] = dto;
 
-  //   return task;
-  // }
+    return dto;
+  }
 
-  // /// 該当するTaskDtoを削除します。存在しなければ例外を投げます。
-  // Future<void> deleteTask(String id) async {
-  //   await _waitCommunication();
+  /// 該当するTaskDtoを削除します。存在しなければ例外を投げます。
+  Future<void> deleteTask(String id) async {
+    await _waitCommunication();
 
-  //   final task = _tasks.where((taskDto) => taskDto.id == id).firstOrNull;
-  //   if (task == null) {
-  //     throw Exception('$idはありませんでした');
-  //   }
+    final taskNum = _tasks.indexWhere((taskDto) => taskDto.id == id);
+    if (taskNum == -1) {
+      throw Exception('$idはありませんでした');
+    }
 
-  //   _tasks.where((taskDto) => taskDto.id != task.id).toList();
-  // }
+    _tasks.removeAt(taskNum);
+  }
 
   /// 模擬通信固有の処理を共通化。
   ///
