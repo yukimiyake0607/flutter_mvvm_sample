@@ -7,12 +7,12 @@ class TaskRepositoryRemote implements TaskRepository {
   TaskRepositoryRemote(this._taskApiClient);
 
   final TaskApiClient _taskApiClient;
-  
+
   /// メモリキャッシュ用のListです。
-  /// 
+  ///
   /// RepositoryはSSOTの役割なので、Taskを唯一触れるのはここだけ。
   /// 外部からは変換できないようにプライベートフィールドとして持つ。
-  List<Task> _cache = [];
+  List<Task>? _cache;
 
   @override
   Future<Result<Task>> createTask({
@@ -36,9 +36,19 @@ class TaskRepositoryRemote implements TaskRepository {
   }
 
   @override
-  Future<Result<List<Task>>> getTasks() {
-    // TODO: implement getTasks
-    throw UnimplementedError();
+  Future<Result<List<Task>>> getTasks() async {
+    try {
+      final dtoTasks = await _taskApiClient.fetchTasks();
+      final tasks = dtoTasks.map((dtoTask) => dtoTask.toDomain()).toList();
+
+      // 取得されたデータをキャッシュに保管
+      _cache = tasks;
+
+      // 返すリストをそのまま渡すのではなく、コピーを渡す（SSOT）
+      return Result.ok(List<Task>.from(tasks));
+    } on Exception catch (error) {
+      return Result.error(error);
+    }
   }
 
   @override
