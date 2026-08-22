@@ -30,9 +30,21 @@ class TaskRepositoryRemote implements TaskRepository {
   }
 
   @override
-  Future<Result<Task>> getTask(String id) {
-    // TODO: implement getTask
-    throw UnimplementedError();
+  Future<Result<Task>> getTask(String id) async {
+    try {
+      // キャッシュの中にある場合は、外部APIを叩かない
+      final taskInCache = _cache?.where((t) => t.id == id).firstOrNull;
+      if (taskInCache != null) return Result.ok(taskInCache);
+
+      final taskDto = await _taskApiClient.fetchTask(id);
+      final task = taskDto.toDomain();
+
+      _cache = [...?_cache, task];
+
+      return Result.ok(task);
+    } on Exception catch (error) {
+      return Result.error(error);
+    }
   }
 
   @override
