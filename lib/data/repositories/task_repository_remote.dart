@@ -1,3 +1,4 @@
+import 'package:flutter_mvvm_sample/data/model/task_dto.dart';
 import 'package:flutter_mvvm_sample/data/repositories/task_repository.dart';
 import 'package:flutter_mvvm_sample/data/services/task_api_client.dart';
 import 'package:flutter_mvvm_sample/domain/models/task.dart';
@@ -36,9 +37,18 @@ class TaskRepositoryRemote implements TaskRepository {
   }
 
   @override
-  Future<Result<void>> deleteTask(String id) {
-    // TODO: implement deleteTask
-    throw UnimplementedError();
+  Future<Result<void>> deleteTask(String id) async {
+    try {
+      await _taskApiClient.deleteTask(id);
+
+      if (_cache != null) {
+        _cache!.removeWhere((t) => t.id == id);
+      }
+
+      return Result.ok(null);
+    } on Exception catch (error) {
+      return Result.error(error);
+    }
   }
 
   @override
