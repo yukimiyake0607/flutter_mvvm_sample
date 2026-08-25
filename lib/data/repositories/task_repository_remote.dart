@@ -18,9 +18,21 @@ class TaskRepositoryRemote implements TaskRepository {
   Future<Result<Task>> createTask({
     required String title,
     required String note,
-  }) {
-    // TODO: implement createTask
-    throw UnimplementedError();
+  }) async {
+    try {
+      final taskDto = await _taskApiClient.createTask(title: title, note: note);
+      final task = taskDto.toDomain();
+
+      if (_cache != null && _cache!.isNotEmpty) {
+        _cache = [..._cache!, task];
+      } else {
+        _cache = [task];
+      }
+
+      return Result.ok(task);
+    } on Exception catch (error) {
+      return Result.error(error);
+    }
   }
 
   @override
