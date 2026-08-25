@@ -76,8 +76,26 @@ class TaskRepositoryRemote implements TaskRepository {
   }
 
   @override
-  Future<Result<Task>> updateTask(Task task) {
-    // TODO: implement updateTask
-    throw UnimplementedError();
+  Future<Result<Task>> updateTask(Task task) async {
+    try {
+      final taskDto = await _taskApiClient.updateTask(TaskDto.fromDomain(task));
+      final updatedTask = taskDto.toDomain();
+
+      if (_cache != null && _cache!.isNotEmpty) {
+        final taskIndex = _cache!.indexWhere((t) => t.id == updatedTask.id);
+        // RangeError対策で見つからなかった場合は条件分岐で単純に追加する
+        if (taskIndex == -1) {
+          _cache = [..._cache!, updatedTask];
+        } else {
+          _cache![taskIndex] = updatedTask;
+        }
+      } else {
+        _cache = [updatedTask];
+      }
+
+      return Result.ok(updatedTask);
+    } on Exception catch (error) {
+      return Result.error(error);
+    }
   }
 }
