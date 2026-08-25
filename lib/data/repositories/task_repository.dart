@@ -2,7 +2,7 @@ import 'package:flutter_mvvm_sample/domain/models/task.dart';
 import 'package:flutter_mvvm_sample/utils/result.dart';
 
 /// ViewModelが呼ぶabstract Repositoryです。
-/// 
+///
 /// ViewModelには責務の観点から例外を漏らしたくないため、
 /// Repositoryでtry/catchしてResultに変換します。
 abstract class TaskRepository {
