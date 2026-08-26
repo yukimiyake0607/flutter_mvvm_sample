@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// routerを返すProviderを定義
-/// 
+///
 /// Riverpodに何をいつ作るかを伝えるためにProviderのコールバックの中でGoRouterを生成。
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(

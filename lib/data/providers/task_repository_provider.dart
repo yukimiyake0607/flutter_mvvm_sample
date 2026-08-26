@@ -4,7 +4,7 @@ import 'package:flutter_mvvm_sample/data/repositories/task_repository_remote.dar
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// TaskRepositoryを提供するProvider
-/// 
+///
 /// テストでFakeに差し替えるため返す型は[TaskRepository]としています。
 /// 画面を閉じてキャッシュが消えるのは困るので、autoDisposeにはしていません。
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
