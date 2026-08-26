@@ -4,6 +4,9 @@ import 'package:flutter_mvvm_sample/ui/task_list/widgets/task_list_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// routerを返すProviderを定義
+/// 
+/// Riverpodに何をいつ作るかを伝えるためにProviderのコールバックの中でGoRouterを生成。
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     routes: [
