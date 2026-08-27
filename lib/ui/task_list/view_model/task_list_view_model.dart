@@ -37,9 +37,9 @@ class TaskListState {
       case TaskFilter.all:
         return tasks;
       case TaskFilter.active:
-        return tasks.where((t) => t.isCompleted == false).toList();
+        return tasks.where((t) => !t.isCompleted).toList();
       case TaskFilter.completed:
-        return tasks.where((t) => t.isCompleted == true).toList();
+        return tasks.where((t) => t.isCompleted).toList();
     }
   }
 }
