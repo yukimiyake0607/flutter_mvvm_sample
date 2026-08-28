@@ -81,10 +81,14 @@ class TaskListViewModel extends Notifier<TaskListState> {
         );
     }
   }
+
+  void setFilter(TaskFilter filter) {
+    state = state.copyWith(filter: filter);
+  }
 }
 
 /// View側でTaskListViewModelをwatchするためのProvider
-/// 
+///
 /// 一覧を離れたらdisposeする。
 /// 公式のCompassではScreenのコンストラクタにViewModelを渡していますが、
 /// このリポジトリではRiverpodを使用しているので、

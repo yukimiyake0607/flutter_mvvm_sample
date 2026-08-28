@@ -48,21 +48,52 @@ class _TaskListBody extends StatelessWidget {
       );
     }
 
-    if (state.filteredTasks.isEmpty) {
-      return const Center(child: Text('タスクがありません'));
-    }
-    return ListView.builder(
-      itemCount: state.filteredTasks.length,
-      itemBuilder: (context, index) {
-        final task = state.filteredTasks[index];
-        return ListTile(
-          onTap: () {
-            context.go('/tasks/${task.id}');
-          },
-          leading: Checkbox(value: task.isCompleted, onChanged: null),
-          title: Text(task.title),
-        );
-      },
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                viewModel.setFilter(TaskFilter.all);
+              },
+              child: Text('すべて'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                viewModel.setFilter(TaskFilter.active);
+              },
+              child: Text('未完了'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                viewModel.setFilter(TaskFilter.completed);
+              },
+              child: Text('完了'),
+            ),
+          ],
+        ),
+        Expanded(
+          child: state.tasks.isEmpty
+              ? Center(child: Text('タスクがありません'))
+              : ListView.builder(
+                  itemCount: state.filteredTasks.length,
+                  itemBuilder: (context, index) {
+                    final task = state.filteredTasks[index];
+                    return ListTile(
+                      onTap: () {
+                        context.go('/tasks/${task.id}');
+                      },
+                      leading: Checkbox(
+                        value: task.isCompleted,
+                        onChanged: null,
+                      ),
+                      title: Text(task.title),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }
