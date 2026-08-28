@@ -1,5 +1,8 @@
+import 'package:flutter_mvvm_sample/data/providers/task_repository_provider.dart';
 import 'package:flutter_mvvm_sample/domain/models/task.dart';
 import 'package:flutter_mvvm_sample/utils/command_state.dart';
+import 'package:flutter_mvvm_sample/utils/result.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum TaskFilter { all, active, completed }
 
@@ -33,7 +36,7 @@ class TaskListState {
   }
 
   /// Taskリストにフィルターをかけて、返すリスト内容を変更するためのgetter
-  /// 
+  ///
   /// 表示用のTaskリストの正が2つになると、更新や作成のし忘れが発生するので
   /// フィルタ済み用のリストはStateに持たないようにしておく。
   List<Task> get filteredTasks {
@@ -47,3 +50,44 @@ class TaskListState {
     }
   }
 }
+
+/// Taskリストを管理するViewModel。
+///
+/// @riverpodでViewModelを生成する方式は今回取りませんでした。
+/// Provider＝DI、Notifier＝画面stateを自分のコードで追えるようにするため。
+class TaskListViewModel extends Notifier<TaskListState> {
+  @override
+  TaskListState build() {
+    Future(() => load());
+    return const TaskListState();
+  }
+
+  Future<void> load() async {
+    if (state.load.running) return;
+
+    state = state.copyWith(load: CommandState(running: true));
+
+    final repository = ref.read(taskRepositoryProvider);
+    final result = await repository.getTasks();
+    switch (result) {
+      case Ok(:final value):
+        state = state.copyWith(
+          tasks: value,
+          load: CommandState(result: Result.ok(null), running: false),
+        );
+      case Error(:final error):
+        state = state.copyWith(
+          load: CommandState(result: Result.error(error), running: false),
+        );
+    }
+  }
+}
+
+/// View側でTaskListViewModelをwatchするためのProvider
+/// 
+/// 一覧を離れたらdisposeする。
+/// コンストラクタを渡してScreenではnewしないように。
+final taskListViewModelProvider =
+    NotifierProvider.autoDispose<TaskListViewModel, TaskListState>(
+      TaskListViewModel.new,
+    );
