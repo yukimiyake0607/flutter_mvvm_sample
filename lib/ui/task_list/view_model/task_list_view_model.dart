@@ -32,6 +32,10 @@ class TaskListState {
     );
   }
 
+  /// Taskリストにフィルターをかけて、返すリスト内容を変更するためのgetter
+  /// 
+  /// 表示用のTaskリストの正が2つになると、更新や作成のし忘れが発生するので
+  /// フィルタ済み用のリストはStateに持たないようにしておく。
   List<Task> get filteredTasks {
     switch (filter) {
       case TaskFilter.all:
