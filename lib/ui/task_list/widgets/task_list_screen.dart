@@ -9,11 +9,11 @@ class TaskListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(taskListViewModelProvider);
-    final notifier = ref.read(taskListViewModelProvider.notifier);
+    final viewModel = ref.read(taskListViewModelProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(title: Text('タスクリスト')),
-      body: _TaskListBody(state: state, notifier: notifier),
+      body: _TaskListBody(state: state, viewModel: viewModel),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
@@ -25,10 +25,10 @@ class TaskListScreen extends ConsumerWidget {
 }
 
 class _TaskListBody extends StatelessWidget {
-  const _TaskListBody({required this.state, required this.notifier});
+  const _TaskListBody({required this.state, required this.viewModel});
 
   final TaskListState state;
-  final TaskListViewModel notifier;
+  final TaskListViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class _TaskListBody extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('データの取得に失敗しました'),
-            ElevatedButton(onPressed: notifier.load, child: Text('再試行')),
+            ElevatedButton(onPressed: viewModel.load, child: Text('再試行')),
           ],
         ),
       );
