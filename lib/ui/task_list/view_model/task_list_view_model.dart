@@ -86,7 +86,13 @@ class TaskListViewModel extends Notifier<TaskListState> {
 /// View側でTaskListViewModelをwatchするためのProvider
 /// 
 /// 一覧を離れたらdisposeする。
-/// コンストラクタを渡してScreenではnewしないように。
+/// 公式のCompassではScreenのコンストラクタにViewModelを渡していますが、
+/// このリポジトリではRiverpodを使用しているので、
+/// Riverpodに生成タイミングと寿命を任せる設計にしています。
+/// 自分でnewしてしまうと
+/// - autoDisposeが効かない
+/// - refが繋がらずtaskRepositoryProviderをreadできない
+/// などが発生してしまうので。
 final taskListViewModelProvider =
     NotifierProvider.autoDispose<TaskListViewModel, TaskListState>(
       TaskListViewModel.new,
