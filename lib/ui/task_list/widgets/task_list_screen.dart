@@ -50,29 +50,7 @@ class _TaskListBody extends StatelessWidget {
 
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                viewModel.setFilter(TaskFilter.all);
-              },
-              child: Text('すべて'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                viewModel.setFilter(TaskFilter.active);
-              },
-              child: Text('未完了'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                viewModel.setFilter(TaskFilter.completed);
-              },
-              child: Text('完了'),
-            ),
-          ],
-        ),
+        _TaskListBodyRow(viewModel: viewModel),
         Expanded(
           child: state.tasks.isEmpty
               ? Center(child: Text('タスクがありません'))
@@ -92,6 +70,39 @@ class _TaskListBody extends StatelessWidget {
                     );
                   },
                 ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TaskListBodyRow extends StatelessWidget {
+  const _TaskListBodyRow({required this.viewModel});
+
+  final TaskListViewModel viewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            viewModel.setFilter(TaskFilter.all);
+          },
+          child: Text('すべて'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            viewModel.setFilter(TaskFilter.active);
+          },
+          child: Text('未完了'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            viewModel.setFilter(TaskFilter.completed);
+          },
+          child: Text('完了'),
         ),
       ],
     );
