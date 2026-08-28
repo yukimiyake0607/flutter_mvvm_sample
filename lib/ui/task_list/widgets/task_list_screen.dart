@@ -52,7 +52,7 @@ class _TaskListBody extends StatelessWidget {
       children: [
         _TaskListBodyRow(viewModel: viewModel),
         Expanded(
-          child: state.tasks.isEmpty
+          child: state.filteredTasks.isEmpty
               ? Center(child: Text('タスクがありません'))
               : ListView.builder(
                   itemCount: state.filteredTasks.length,
