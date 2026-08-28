@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mvvm_sample/ui/task_list/view_model/task_list_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class TaskListScreen extends ConsumerWidget {
   const TaskListScreen({super.key});
@@ -13,6 +14,12 @@ class TaskListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text('タスクリスト')),
       body: _TaskListBody(state: state, notifier: notifier),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {
+          context.go('/tasks/new');
+        },
+      ),
     );
   }
 }
