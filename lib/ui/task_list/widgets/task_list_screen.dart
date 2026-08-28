@@ -50,7 +50,7 @@ class _TaskListBody extends StatelessWidget {
 
     return Column(
       children: [
-        _TaskListBodyRow(viewModel: viewModel),
+        _TaskListBodyRow(filter: state.filter, viewModel: viewModel),
         Expanded(
           child: state.filteredTasks.isEmpty
               ? Center(child: Text('タスクがありません'))
@@ -77,8 +77,9 @@ class _TaskListBody extends StatelessWidget {
 }
 
 class _TaskListBodyRow extends StatelessWidget {
-  const _TaskListBodyRow({required this.viewModel});
+  const _TaskListBodyRow({required this.filter, required this.viewModel});
 
+  final TaskFilter filter;
   final TaskListViewModel viewModel;
 
   @override
@@ -90,18 +91,33 @@ class _TaskListBodyRow extends StatelessWidget {
           onPressed: () {
             viewModel.setFilter(TaskFilter.all);
           },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: filter == TaskFilter.all
+                ? Colors.amberAccent
+                : Colors.white,
+          ),
           child: Text('すべて'),
         ),
         ElevatedButton(
           onPressed: () {
             viewModel.setFilter(TaskFilter.active);
           },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: filter == TaskFilter.active
+                ? Colors.amberAccent
+                : Colors.white,
+          ),
           child: Text('未完了'),
         ),
         ElevatedButton(
           onPressed: () {
             viewModel.setFilter(TaskFilter.completed);
           },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: filter == TaskFilter.completed
+                ? Colors.amberAccent
+                : Colors.white,
+          ),
           child: Text('完了'),
         ),
       ],
