@@ -11,6 +11,7 @@ class TaskListScreen extends ConsumerWidget {
       appBar: AppBar(title: Text('タスクリスト')),
       body: Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton(
               onPressed: () {
