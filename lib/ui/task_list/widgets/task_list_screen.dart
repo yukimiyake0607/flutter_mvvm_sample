@@ -84,41 +84,25 @@ class _TaskListBodyRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      runSpacing: 8,
+      spacing: 8,
       children: [
-        ElevatedButton(
-          onPressed: () {
-            viewModel.setFilter(TaskFilter.all);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: filter == TaskFilter.all
-                ? Colors.amberAccent
-                : Colors.white,
-          ),
-          child: Text('すべて'),
+        FilterChip(
+          label: const Text('すべて'),
+          selected: filter == TaskFilter.all,
+          onSelected: (_) => viewModel.setFilter(TaskFilter.all),
         ),
-        ElevatedButton(
-          onPressed: () {
-            viewModel.setFilter(TaskFilter.active);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: filter == TaskFilter.active
-                ? Colors.amberAccent
-                : Colors.white,
-          ),
-          child: Text('未完了'),
+        FilterChip(
+          label: const Text('未完了'),
+          selected: filter == TaskFilter.active,
+          onSelected: (_) => viewModel.setFilter(TaskFilter.active),
         ),
-        ElevatedButton(
-          onPressed: () {
-            viewModel.setFilter(TaskFilter.completed);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: filter == TaskFilter.completed
-                ? Colors.amberAccent
-                : Colors.white,
-          ),
-          child: Text('完了'),
+        FilterChip(
+          label: const Text('完了'),
+          selected: filter == TaskFilter.completed,
+          onSelected: (_) => viewModel.setFilter(TaskFilter.completed),
         ),
       ],
     );
