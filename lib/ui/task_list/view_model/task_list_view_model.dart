@@ -68,6 +68,9 @@ class TaskListViewModel extends Notifier<TaskListState> {
   /// ここでは非同期状態をloadとdeleteに分けているので、AsyncNotifierにはせず同期で返します。
   ///
   /// [TaskListState]を最初のフレームで返しますが、loadですぐに非同期処理を行います。
+  /// 2つの非同期状態（load, delete）に分けるためAsyncValueを使用しません。
+  /// そのためAsyncNotifierProviderにする必要性もなくなります。
+  /// つまり、ここでは非同期の正をCommandStateだけにしています。
   @override
   TaskListState build() {
     Future(() => load());
