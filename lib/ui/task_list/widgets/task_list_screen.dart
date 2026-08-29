@@ -11,6 +11,14 @@ class TaskListScreen extends ConsumerWidget {
     final state = ref.watch(taskListViewModelProvider);
     final viewModel = ref.read(taskListViewModelProvider.notifier);
 
+    ref.listen(taskListViewModelProvider, (previous, next) {
+      if (next.delete.hasError && previous?.delete.hasError != true) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(title: Text('タスクリスト')),
       body: _TaskListBody(state: state, viewModel: viewModel),
@@ -65,6 +73,14 @@ class _TaskListBody extends StatelessWidget {
                       leading: Checkbox(
                         value: task.isCompleted,
                         onChanged: null,
+                      ),
+                      trailing: IconButton(
+                        onPressed: () {
+                          // 失敗はlistenの方でみている。
+                          // なのでdeleteTaskはFutureですが、awaitはしません。
+                          viewModel.deleteTask(task.id);
+                        },
+                        icon: Icon(Icons.delete, color: Colors.red),
                       ),
                       title: Text(task.title),
                     );

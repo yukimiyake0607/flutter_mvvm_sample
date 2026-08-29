@@ -86,6 +86,26 @@ class TaskListViewModel extends Notifier<TaskListState> {
   void setFilter(TaskFilter filter) {
     state = state.copyWith(filter: filter);
   }
+
+  Future<void> deleteTask(String id) async {
+    // 削除ボタンの連打を阻止する
+    if (state.delete.running) return;
+
+    state = state.copyWith(delete: CommandState(running: true));
+    final result = await ref.read(taskRepositoryProvider).deleteTask(id);
+
+    switch (result) {
+      case Ok():
+        state = state.copyWith(
+          delete: CommandState(result: Result.ok(null)),
+          tasks: state.tasks.where((t) => t.id != id).toList(),
+        );
+      case Error(:final error):
+        state = state.copyWith(
+          delete: CommandState(result: Result.error(error)),
+        );
+    }
+  }
 }
 
 /// View側でTaskListViewModelをwatchするためのProvider
