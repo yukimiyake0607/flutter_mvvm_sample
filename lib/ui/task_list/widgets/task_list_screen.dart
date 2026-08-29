@@ -3,6 +3,11 @@ import 'package:flutter_mvvm_sample/ui/task_list/view_model/task_list_view_model
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+
+/// Taskリストを表示するためのViewです。[TaskListViewModel]と1：1。
+/// 
+/// ViewにはRepository, Clientをimportさせません。
+/// ナビゲーションはViewの責務としており、[TaskListViewModel]には書かない。
 class TaskListScreen extends ConsumerWidget {
   const TaskListScreen({super.key});
 
@@ -11,7 +16,11 @@ class TaskListScreen extends ConsumerWidget {
     final state = ref.watch(taskListViewModelProvider);
     final viewModel = ref.read(taskListViewModelProvider.notifier);
 
+    // 削除ボタンタップ時に失敗した場合はここでSnackBarを表示させる。
+    // なので呼び出し側ではawaitしない。
     ref.listen(taskListViewModelProvider, (previous, next) {
+      // hasErrorがtrueとして残るとフィルタのたびにSnackBarが表示されるので、
+      // previousの確認も入れてます。
       if (next.delete.hasError && previous?.delete.hasError != true) {
         ScaffoldMessenger.of(
           context,
@@ -76,8 +85,6 @@ class _TaskListBody extends StatelessWidget {
                       ),
                       trailing: IconButton(
                         onPressed: () {
-                          // 失敗はlistenの方でみている。
-                          // なのでdeleteTaskはFutureですが、awaitはしません。
                           viewModel.deleteTask(task.id);
                         },
                         icon: Icon(Icons.delete, color: Colors.red),
