@@ -74,11 +74,11 @@ class TaskListViewModel extends Notifier<TaskListState> {
       case Ok(:final value):
         state = state.copyWith(
           tasks: value,
-          load: CommandState(result: Result.ok(null), running: false),
+          load: CommandState(result: Result.ok(null)),
         );
       case Error(:final error):
         state = state.copyWith(
-          load: CommandState(result: Result.error(error), running: false),
+          load: CommandState(result: Result.error(error)),
         );
     }
   }
