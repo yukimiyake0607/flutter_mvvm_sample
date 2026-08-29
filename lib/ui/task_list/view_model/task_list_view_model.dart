@@ -1,0 +1,140 @@
+import 'package:flutter_mvvm_sample/data/providers/task_repository_provider.dart';
+import 'package:flutter_mvvm_sample/domain/models/task.dart';
+import 'package:flutter_mvvm_sample/utils/command_state.dart';
+import 'package:flutter_mvvm_sample/utils/result.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+enum TaskFilter { all, active, completed }
+
+/// [TaskListViewModel]が管理するStateです。
+///
+/// load: 初回取得で使用。View側は全面スピナー、エラー表示。
+/// delete: タスク削除用。Viewはリストを残してSnackbar。
+/// tasks: Repositoryから来た全件。フィルタ済みは持たない。
+class TaskListState {
+  const TaskListState({
+    this.tasks = const [],
+    this.filter = TaskFilter.all,
+    this.load = const CommandState(),
+    this.delete = const CommandState(),
+  });
+
+  final List<Task> tasks;
+  final TaskFilter filter;
+  final CommandState<void> load;
+  final CommandState<void> delete;
+
+  /// Stateを変更するためのcopyWithメソッドです。
+  TaskListState copyWith({
+    List<Task>? tasks,
+    TaskFilter? filter,
+    CommandState<void>? load,
+    CommandState<void>? delete,
+  }) {
+    return TaskListState(
+      tasks: tasks ?? this.tasks,
+      filter: filter ?? this.filter,
+      load: load ?? this.load,
+      delete: delete ?? this.delete,
+    );
+  }
+
+  /// Taskリストにフィルターをかけて、返すリスト内容を変更するためのgetter
+  ///
+  /// 表示用のTaskリストの正が2つになると、更新や作成のし忘れが発生するので
+  /// フィルタ済み用のリストはStateに持たないようにしておく。
+  List<Task> get filteredTasks {
+    switch (filter) {
+      case TaskFilter.all:
+        return tasks;
+      case TaskFilter.active:
+        return tasks.where((t) => !t.isCompleted).toList();
+      case TaskFilter.completed:
+        return tasks.where((t) => t.isCompleted).toList();
+    }
+  }
+}
+
+/// Taskリストを管理するViewModel。
+///
+/// - @riverpodでViewModelを生成する方式は今回取りませんでした。
+///   Provider＝DI、Notifier＝画面stateを自分のコードで追えるようにするためです。
+/// - View(TaskListScreen）：ViewModel([TaskListViewModel])が1：1になるようにしています。
+/// - Repositoryはreadしますが、Viewではimportさせません
+/// - 知っているのはRepositoryまでで、Service・Dtoは知りません。
+/// - TaskListStateはisLoadingではなく、loadとdeleteを別で管理しています。
+///   1つのidLoadingだと区別できないため。
+class TaskListViewModel extends Notifier<TaskListState> {
+  /// ここでは非同期状態をloadとdeleteに分けているので、AsyncNotifierにはせず同期で返します。
+  ///
+  /// [TaskListState]を最初のフレームで返しますが、loadですぐに非同期処理を行います。
+  /// 2つの非同期状態（load, delete）に分けるためAsyncValueを使用しません。
+  /// そのためAsyncNotifierProviderにする必要性もなくなります。
+  /// つまり、ここでは非同期の正をCommandStateだけにしています。
+  @override
+  TaskListState build() {
+    Future(() => load());
+    return const TaskListState();
+  }
+
+  /// 初回呼び出しは[build]からです。View側のbuildでは呼びません。
+  ///
+  /// 再試行はViewから呼んでよく、失敗時はtasksを空にしない。
+  Future<void> load() async {
+    // loadの連打を阻止する
+    if (state.load.running) return;
+
+    state = state.copyWith(load: CommandState(running: true));
+
+    final repository = ref.read(taskRepositoryProvider);
+    final result = await repository.getTasks();
+    switch (result) {
+      case Ok(:final value):
+        state = state.copyWith(
+          tasks: value,
+          load: CommandState(result: Result.ok(null)),
+        );
+      case Error(:final error):
+        state = state.copyWith(load: CommandState(result: Result.error(error)));
+    }
+  }
+
+  void setFilter(TaskFilter filter) {
+    state = state.copyWith(filter: filter);
+  }
+
+  Future<void> deleteTask(String id) async {
+    // 削除ボタンの連打を阻止する
+    if (state.delete.running) return;
+
+    state = state.copyWith(delete: CommandState(running: true));
+    final result = await ref.read(taskRepositoryProvider).deleteTask(id);
+
+    switch (result) {
+      case Ok():
+        state = state.copyWith(
+          delete: CommandState(result: Result.ok(null)),
+          tasks: state.tasks.where((t) => t.id != id).toList(),
+        );
+      case Error(:final error):
+        state = state.copyWith(
+          delete: CommandState(result: Result.error(error)),
+        );
+    }
+  }
+}
+
+/// View側でTaskListViewModelをwatchするためのProvider
+///
+/// 一覧を離れたらdisposeする。
+/// 公式のCompassではScreenのコンストラクタにViewModelを渡していますが、
+/// このリポジトリではRiverpodを使用しているので、
+/// Riverpodに生成タイミングと寿命を任せる設計にしています。
+/// 自分でnewしてしまうと
+/// - autoDisposeが効かない
+/// - refが繋がらずtaskRepositoryProviderをreadできない
+/// などが発生してしまうので。
+final taskListViewModelProvider =
+    NotifierProvider.autoDispose<TaskListViewModel, TaskListState>(
+      TaskListViewModel.new,
+    );
