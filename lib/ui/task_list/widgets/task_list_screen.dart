@@ -3,9 +3,8 @@ import 'package:flutter_mvvm_sample/ui/task_list/view_model/task_list_view_model
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-
 /// Taskリストを表示するためのViewです。[TaskListViewModel]と1：1。
-/// 
+///
 /// ViewにはRepository, Clientをimportさせません。
 /// ナビゲーションはViewの責務としており、[TaskListViewModel]には書かない。
 class TaskListScreen extends ConsumerWidget {

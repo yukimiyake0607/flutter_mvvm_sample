@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 enum TaskFilter { all, active, completed }
 
 /// [TaskListViewModel]が管理するStateです。
-/// 
+///
 /// load: 初回取得で使用。View側は全面スピナー、エラー表示。
 /// delete: タスク削除用。Viewはリストを残してSnackbar。
 /// tasks: Repositoryから来た全件。フィルタ済みは持たない。
@@ -65,9 +65,8 @@ class TaskListState {
 /// - TaskListStateはisLoadingではなく、loadとdeleteを別で管理しています。
 ///   1つのidLoadingだと区別できないため。
 class TaskListViewModel extends Notifier<TaskListState> {
-  
   /// ここでは非同期状態をloadとdeleteに分けているので、AsyncNotifierにはせず同期で返します。
-  /// 
+  ///
   /// [TaskListState]を最初のフレームで返しますが、loadですぐに非同期処理を行います。
   @override
   TaskListState build() {
@@ -76,7 +75,7 @@ class TaskListViewModel extends Notifier<TaskListState> {
   }
 
   /// 初回呼び出しは[build]からです。View側のbuildでは呼びません。
-  /// 
+  ///
   /// 再試行はViewから呼んでよく、失敗時はtasksを空にしない。
   Future<void> load() async {
     // loadの連打を阻止する
@@ -93,9 +92,7 @@ class TaskListViewModel extends Notifier<TaskListState> {
           load: CommandState(result: Result.ok(null)),
         );
       case Error(:final error):
-        state = state.copyWith(
-          load: CommandState(result: Result.error(error)),
-        );
+        state = state.copyWith(load: CommandState(result: Result.error(error)));
     }
   }
 
