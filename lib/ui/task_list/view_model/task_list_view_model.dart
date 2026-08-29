@@ -63,6 +63,7 @@ class TaskListViewModel extends Notifier<TaskListState> {
   }
 
   Future<void> load() async {
+    // loadの連打を阻止する
     if (state.load.running) return;
 
     state = state.copyWith(load: CommandState(running: true));
