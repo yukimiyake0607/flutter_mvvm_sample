@@ -6,7 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum TaskFilter { all, active, completed }
 
-/// TaskListViewModelで管理するStateです。
+/// [TaskListViewModel]が管理するStateです。
+/// 
+/// load: 初回取得で使用。View側は全面スピナー、エラー表示。
+/// delete: タスク削除用。Viewはリストを残してSnackbar。
+/// tasks: Repositoryから来た全件。フィルタ済みは持たない。
 class TaskListState {
   const TaskListState({
     this.tasks = const [],
@@ -53,15 +57,27 @@ class TaskListState {
 
 /// Taskリストを管理するViewModel。
 ///
-/// @riverpodでViewModelを生成する方式は今回取りませんでした。
-/// Provider＝DI、Notifier＝画面stateを自分のコードで追えるようにするため。
+/// - @riverpodでViewModelを生成する方式は今回取りませんでした。
+///   Provider＝DI、Notifier＝画面stateを自分のコードで追えるようにするためです。
+/// - View(TaskListScreen）：ViewModel([TaskListViewModel])が1：1になるようにしています。
+/// - Repositoryはreadしますが、Viewではimportさせません
+/// - 知っているのはRepositoryまでで、Service・Dtoは知りません。
+/// - TaskListStateはisLoadingではなく、loadとdeleteを別で管理しています。
+///   1つのidLoadingだと区別できないため。
 class TaskListViewModel extends Notifier<TaskListState> {
+  
+  /// ここでは非同期状態をloadとdeleteに分けているので、AsyncNotifierにはせず同期で返します。
+  /// 
+  /// [TaskListState]を最初のフレームで返しますが、loadですぐに非同期処理を行います。
   @override
   TaskListState build() {
     Future(() => load());
     return const TaskListState();
   }
 
+  /// 初回呼び出しは[build]からです。View側のbuildでは呼びません。
+  /// 
+  /// 再試行はViewから呼んでよく、失敗時はtasksを空にしない。
   Future<void> load() async {
     // loadの連打を阻止する
     if (state.load.running) return;
