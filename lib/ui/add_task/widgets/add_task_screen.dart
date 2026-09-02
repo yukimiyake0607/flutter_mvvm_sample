@@ -3,6 +3,9 @@ import 'package:flutter_mvvm_sample/ui/add_task/view_model/add_task_view_model.d
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// AddTaskViewModel（ViewModel）と1：1のViewです。
+/// 
+/// repository, clientとは連携しません。
 class AddTaskScreen extends ConsumerStatefulWidget {
   const AddTaskScreen({super.key});
 
@@ -11,6 +14,7 @@ class AddTaskScreen extends ConsumerStatefulWidget {
 }
 
 class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
+  // タイトルとメモを管理する
   final titleController = TextEditingController();
   final noteController = TextEditingController();
 
@@ -23,6 +27,11 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // submitは成功・失敗を返さないので、「追加」のタップ処理はsubmitを呼ぶだけにしています。
+    // 処理が完了したかはCommandStateを確認する必要があるので、ここでlistenして結果を出し分けています。
+    // また、completed/hasErrorが残ったまま再ビルドするのでpop, SnackBarが再発します。
+    // なのでpreviousも確認しています。
+    // ここでもViewModelはフラグだけ出す、ViewはナビゲーションとSnackBar表示を責務としています。
     ref.listen(addTaskViewModelProvider, (previous, next) {
       if (next.submit.hasError && previous?.submit.hasError != true) {
         ScaffoldMessenger.of(
