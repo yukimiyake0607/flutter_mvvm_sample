@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mvvm_sample/ui/add_task/view_model/add_task_view_model.dart';
+import 'package:flutter_mvvm_sample/utils/result.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// AddTaskViewModel（ViewModel）と1：1のViewです。
-/// 
+///
 /// repository, clientとは連携しません。
 class AddTaskScreen extends ConsumerStatefulWidget {
   const AddTaskScreen({super.key});
@@ -33,9 +34,16 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
     // ここでもViewModelはフラグだけ出す、ViewはナビゲーションとSnackBar表示を責務としています。
     ref.listen(addTaskViewModelProvider, (previous, next) {
       if (next.submit.hasError && previous?.submit.hasError != true) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('追加に失敗しました')));
+        switch (next.submit.result) {
+          case Ok():
+            break;
+          case Error(:final error):
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(error.toString())));
+          case null:
+            break;
+        }
       }
 
       if (next.submit.completed && previous?.submit.completed != true) {
