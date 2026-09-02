@@ -29,8 +29,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
   Widget build(BuildContext context) {
     // submitは成功・失敗を返さないので、「追加」のタップ処理はsubmitを呼ぶだけにしています。
     // 処理が完了したかはCommandStateを確認する必要があるので、ここでlistenして結果を出し分けています。
-    // また、completed/hasErrorが残ったまま再ビルドするのでpop, SnackBarが再発します。
-    // なのでpreviousも確認しています。
+    // previousを見ないと、completed, hasErrorが残ったまま再ビルドするたびにpop, SnackBarが再発します。
     // ここでもViewModelはフラグだけ出す、ViewはナビゲーションとSnackBar表示を責務としています。
     ref.listen(addTaskViewModelProvider, (previous, next) {
       if (next.submit.hasError && previous?.submit.hasError != true) {
