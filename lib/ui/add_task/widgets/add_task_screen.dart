@@ -47,7 +47,7 @@ class _AddTaskScreenState extends ConsumerState<AddTaskScreen> {
       }
 
       if (next.submit.completed && previous?.submit.completed != true) {
-        context.go('/');
+        context.pop();
       }
     });
 
