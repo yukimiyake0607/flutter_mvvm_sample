@@ -5,7 +5,7 @@ import 'package:flutter_mvvm_sample/utils/result.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// [AddTaskViewModel]が管理するStateです。
-/// 
+///
 /// submit: タスク追加時の状態をここで持ちます。
 /// titleやnoteをStateで管理しない理由は、一時的な状態のためUI（TextEditingController）で
 /// 管理すべきだと判断したからです。
@@ -22,12 +22,11 @@ class AddTaskState {
 }
 
 /// AddTaskScreen（View）と1：1のViewModelです。
-/// 
+///
 /// Repositoryとはreadします。
 /// Service, Dtoとは連携しません。
 /// contextが必要な操作はViewに任せています。
 class AddTaskViewModel extends Notifier<AddTaskState> {
-  
   // 一覧とは違い初期取得するものがないので、空のAddTaskStateを返すだけ。
   @override
   AddTaskState build() {
@@ -35,7 +34,7 @@ class AddTaskViewModel extends Notifier<AddTaskState> {
   }
 
   /// View側で実行するsubmitメソッド。
-  /// 
+  ///
   /// 空タイトルの場合はRepositoryを呼ばずにResult.errorにして返す。
   Future<void> submit(String title, String note) async {
     if (state.submit.running) return;
@@ -65,7 +64,7 @@ class AddTaskViewModel extends Notifier<AddTaskState> {
 }
 
 /// [AddTaskViewModel]を管理するProvider。
-/// 
+///
 /// 画面を離れたら破棄するためautoDisposeをつけています。
 final addTaskViewModelProvider =
     NotifierProvider.autoDispose<AddTaskViewModel, AddTaskState>(
