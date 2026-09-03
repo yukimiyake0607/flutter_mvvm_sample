@@ -32,8 +32,9 @@ class TaskListScreen extends ConsumerWidget {
       body: _TaskListBody(state: state, viewModel: viewModel),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {
-          context.go('/tasks/new');
+        onPressed: () async {
+          await context.push('/tasks/new');
+          viewModel.load();
         },
       ),
     );
