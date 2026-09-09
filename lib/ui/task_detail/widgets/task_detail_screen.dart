@@ -20,6 +20,12 @@ class TaskDetailScreen extends ConsumerWidget {
         ).showSnackBar(SnackBar(content: Text('削除に失敗しました')));
       }
 
+      if (next.toggle.hasError && previous?.toggle.hasError != true) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('チェックの変更に失敗しました')));
+      }
+
       if (next.delete.completed && previous?.delete.completed != true) {
         context.pop();
       }
