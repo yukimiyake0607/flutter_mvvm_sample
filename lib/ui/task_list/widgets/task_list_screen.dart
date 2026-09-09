@@ -76,8 +76,9 @@ class _TaskListBody extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final task = state.filteredTasks[index];
                     return ListTile(
-                      onTap: () {
-                        context.go('/tasks/${task.id}');
+                      onTap: () async {
+                        await context.push('/tasks/${task.id}');
+                        viewModel.load();
                       },
                       leading: Checkbox(
                         value: task.isCompleted,
