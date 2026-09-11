@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 /// タスク詳細画面を担当するViewです。
 ///
 /// NotifierProviderのfamilyにidを渡すために[id]を引数とするコンストラクタを持ちます。
+/// ViewではRepositoryをimportしません。
+/// navigationはViewで。
 class TaskDetailScreen extends ConsumerWidget {
   const TaskDetailScreen({super.key, required this.id});
 

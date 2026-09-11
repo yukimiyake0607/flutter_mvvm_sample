@@ -79,8 +79,8 @@ class _TaskListBody extends StatelessWidget {
                       onTap: () async {
                         await context.push('/tasks/${task.id}');
                         // 詳細画面で起きた変化を一覧画面でも取り入れなければいけない。
-                        // RepositoryをSSOTにしているため変化に反応できないのでloadをかけてます。
-                        // これはViewとViewModelを1：1にしているから。
+                        // RepositoryをSSOTにしているため、戻ってからload()することで
+                        // 一覧も同じ正を読めるようにしている
                         viewModel.load();
                       },
                       leading: Checkbox(

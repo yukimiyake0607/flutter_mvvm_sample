@@ -84,7 +84,7 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
 
     state = state.copyWith(toggle: CommandState(running: true));
 
-    // Taskは全部finalで次はコンパイルできないので、copyWithで別インスタンスを作成して渡す
+    // isCompletedは代入できないので、copyWithで新しいTaskを渡す
     final result = await ref
         .read(taskRepositoryProvider)
         .updateTask(task.copyWith(isCompleted: !task.isCompleted));
