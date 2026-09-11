@@ -4,6 +4,10 @@ import 'package:flutter_mvvm_sample/utils/command_state.dart';
 import 'package:flutter_mvvm_sample/utils/result.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// [TaskDetailViewModel]が管理しているStateです。
+///
+/// AsyncValueを使うとローディング状態を一括でしか管理できない。
+/// 個別でローディングや結果を扱うためにload / toggle / deleteに分けてます。
 class TaskDetailState {
   const TaskDetailState({
     this.task,
@@ -32,6 +36,12 @@ class TaskDetailState {
   }
 }
 
+/// Task詳細を管理するViewModelです。
+///
+/// View（TaskDetailScreen）と1：1のViewModel。
+/// [taskRepositoryProvider]を使用しています。
+/// Flutter公式のMVVM通り、同じRepositoryを複数のViewModelで使用しています。（many-to-many）
+/// navigationはViewの責務としてます。
 class TaskDetailViewModel extends Notifier<TaskDetailState> {
   TaskDetailViewModel(this.id);
   final String id;
@@ -59,12 +69,22 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
     }
   }
 
+  /// 完了・未完了を扱うメソッドです。
+  ///
+  /// 先にチェックを動かして失敗したら戻す楽観的更新はしていません。
+  /// このプロジェクトでは[Task]を変えて良いのはRepositoryだけ（SSOT）としているためです。
+  /// 先にStateのtaskを反転させると、
+  /// - 画面が見ている完了状態（true）
+  /// - Repositoryの正(false)
+  /// になってズレる。
   Future<void> toggleCompleted() async {
     final task = state.task;
     if (task == null) return;
     if (state.toggle.running) return;
 
     state = state.copyWith(toggle: CommandState(running: true));
+
+    // Taskは全部finalで次はコンパイルできないので、copyWithで別インスタンスを作成して渡す
     final result = await ref
         .read(taskRepositoryProvider)
         .updateTask(task.copyWith(isCompleted: !task.isCompleted));
@@ -98,6 +118,12 @@ class TaskDetailViewModel extends Notifier<TaskDetailState> {
   }
 }
 
+/// [TaskDetailViewModel]を管理するNotifierProviderです。
+///
+/// 受け取ったIDを元にViewを作成するので、同じ[taskDetailViewModelProvider]でも
+/// 一意性を保つためfamilyを追加しています。
+/// そのため呼び出し元ではIDを受け取ることを必須としています。
+/// ※タスク詳細画面なのでIDがないと空ページになってしまう。
 final taskDetailViewModelProvider = NotifierProvider.autoDispose
     .family<TaskDetailViewModel, TaskDetailState, String>(
       TaskDetailViewModel.new,
