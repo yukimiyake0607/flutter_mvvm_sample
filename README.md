@@ -47,6 +47,17 @@ View は Repository を知りません。ViewModel は Service も DTO も知り
 
 ---
 
+## UI層（MVVMのViewとViewModel）
+
+公式 MVVM の UI層は **View** と **ViewModel** に分かれています。
+また、View と ViewModelは1：1にしています。つまり、ViewModelを複数のViewで使用することはしません。
+Viewはnavigationなどを担当しますが、RepositoryとのやりとりはViewModelに任せます。
+ViewModelとRepositoryはmany-to-manyです。実際に3画面で `[taskRepositoryProvider](lib/data/providers/task_repository_provider.dart)` を呼び出してます。
+
+- `TaskListScreen` と `TaskListViewModel`
+- `TaskDetailScreen` と `TaskDetailViewModel`
+- `AddTaskScreen` と `AddTaskViewModel`
+
 ## 今後この README に足すこと
 
 - 公式 Compass は `ChangeNotifier` + `provider` なのに、なぜ Riverpod にするか
