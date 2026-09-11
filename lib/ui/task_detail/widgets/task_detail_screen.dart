@@ -3,6 +3,9 @@ import 'package:flutter_mvvm_sample/ui/task_detail/view_model/task_detail_view_m
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// タスク詳細画面を担当するViewです。
+///
+/// NotifierProviderのfamilyにidを渡すために[id]を引数とするコンストラクタを持ちます。
 class TaskDetailScreen extends ConsumerWidget {
   const TaskDetailScreen({super.key, required this.id});
 
@@ -14,6 +17,9 @@ class TaskDetailScreen extends ConsumerWidget {
     final notifier = ref.read(taskDetailViewModelProvider(id).notifier);
 
     ref.listen(taskDetailViewModelProvider(id), (previous, next) {
+      // previousでfalse、nextでtrueの時のみSnackBarを表示させる。
+      // StateのCommandStateは結果を持ち続けるため、nextだけしか見ていない場合、
+      // toggleやdeleteでStateが変更した時にSnackBarの誤表示が起きてしまう。
       if (next.delete.hasError && previous?.delete.hasError != true) {
         ScaffoldMessenger.of(
           context,
