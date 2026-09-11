@@ -76,8 +76,12 @@ class _TaskListBody extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final task = state.filteredTasks[index];
                     return ListTile(
-                      onTap: () {
-                        context.go('/tasks/${task.id}');
+                      onTap: () async {
+                        await context.push('/tasks/${task.id}');
+                        // 詳細画面で起きた変化を一覧画面でも取り入れなければいけない。
+                        // RepositoryをSSOTにしているため、戻ってからload()することで
+                        // 一覧も同じ正を読めるようにしている
+                        viewModel.load();
                       },
                       leading: Checkbox(
                         value: task.isCompleted,
