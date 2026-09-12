@@ -72,4 +72,26 @@ void main() {
     expect(state.submit.hasError, isTrue);
     verify(() => mock.createTask(title: 'プロテイン', note: '納豆も')).called(1);
   });
+
+  test('空タイトルならRepositoryを呼ばずにhasErrorになる(mock)', () async {
+    final mock = MockTaskRepository();
+
+    final container = ProviderContainer(
+      overrides: [taskRepositoryProvider.overrideWithValue(mock)],
+    );
+    addTearDown(container.dispose);
+    container.listen(addTaskViewModelProvider, (_, _) {});
+
+    final viewModel = container.read(addTaskViewModelProvider.notifier);
+    await viewModel.submit(' ', 'メモ');
+
+    final state = container.read(addTaskViewModelProvider);
+    expect(state.submit.hasError, isTrue);
+    verifyNever(
+      () => mock.createTask(
+        title: any(named: 'title'),
+        note: any(named: 'note'),
+      ),
+    );
+  });
 }
