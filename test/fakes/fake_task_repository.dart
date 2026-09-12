@@ -3,7 +3,7 @@ import 'package:flutter_mvvm_sample/domain/models/task.dart';
 import 'package:flutter_mvvm_sample/utils/result.dart';
 
 /// TaskRepositoryを実装したFake用Repositoryです。
-/// 
+///
 /// Fakeが結果（成功または失敗）を返した時に、ViewModelのstateが
 /// 想定通り変化するかを調べる用のRepositoryです。
 /// ※調べるのは「Repository」が叩かれたかどうかではないです。
@@ -12,17 +12,19 @@ class FakeTaskRepository implements TaskRepository {
 
   List<Task>? _cache;
   bool shouldFail;
+  int createCallCount = 0;
 
   @override
   Future<Result<Task>> createTask({
     required String title,
     required String note,
   }) async {
+    createCallCount++;
     // 失敗かどうかはここで決める
     if (shouldFail) {
       return Result.error(Exception('失敗'));
     }
-    
+
     // 本来はサーバーがidをつけますが、Fakeは適当でいいので固定。
     final task = Task(
       id: 'task-1',

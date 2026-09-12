@@ -47,4 +47,23 @@ void main() {
     expect(state.submit.hasError, isTrue);
     expect(state.submit.completed, isFalse);
   });
+
+  test('空タイトルならRepositoryを呼ばずにhasErrorになる', () async {
+    final fakeRepository = FakeTaskRepository(shouldFail: true);
+
+    final container = ProviderContainer(
+      overrides: [taskRepositoryProvider.overrideWithValue(fakeRepository)],
+    );
+    addTearDown(container.dispose);
+
+    container.listen(addTaskViewModelProvider, (_, _) {});
+
+    final viewModel = container.read(addTaskViewModelProvider.notifier);
+    await viewModel.submit(' ', 'メモ');
+
+    final state = container.read(addTaskViewModelProvider);
+    expect(state.submit.hasError, isTrue);
+    // 空タイトルの場合Repositoryは呼ばないことになっているので0になるはず
+    expect(fakeRepository.createCallCount, 0);
+  });
 }
