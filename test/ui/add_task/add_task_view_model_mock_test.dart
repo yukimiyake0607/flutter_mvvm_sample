@@ -10,6 +10,16 @@ import 'package:mocktail/mocktail.dart';
 // 中身は空の状態。テストで処理を書いていく。
 class MockTaskRepository extends Mock implements TaskRepository {}
 
+/// createメソッドのテストに関してはFakeとMock両方のテストを追加しました。
+/// 
+/// ここではMockでテストをしています。
+/// createメソッドは「空文字」の場合エラーを投げます。
+/// Mockでは「呼んだ・呼んでいない」をverify / verifyNeverで検証することができるので、
+/// 空文字テストはFakeRepositoryを作成するよりMockでやった方が楽です。
+/// ただし、Fakeは連続操作を検証する際に便利なのでトレードオフです。
+/// このリポジトリでは複雑なロジックを組んでいないのでMockの方が相性がいいかもしれません。
+/// ただし、このリポジトリの本筋は正解を導くことではなく、公式Compassをなぞって自分なりのMVVMの考え方を
+/// 構築することなのでFakeで通します。
 void main() {
   test('submitが成功すると submit.completedがtrueになる(mock)', () async {
     final mock = MockTaskRepository();
