@@ -14,6 +14,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [taskRepositoryProvider.overrideWithValue(fakeRepository)],
     );
+    // テスト終了後、ProviderContainerを確実に破棄するため
     addTearDown(container.dispose);
 
     // autoDisposeのViewModelが途中で捨てられないように
