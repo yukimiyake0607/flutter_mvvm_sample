@@ -28,4 +28,23 @@ void main() {
     final state = container.read(addTaskViewModelProvider);
     expect(state.submit.completed, isTrue);
   });
+
+  test('submitが失敗すると submit.hasErrorがtrueになる', () async {
+    // 失敗するFake用のRepositoryインスタンスを作成
+    final fakeRepository = FakeTaskRepository(shouldFail: true);
+
+    final container = ProviderContainer(
+      overrides: [taskRepositoryProvider.overrideWithValue(fakeRepository)],
+    );
+    addTearDown(container.dispose);
+
+    container.listen(addTaskViewModelProvider, (_, _) {});
+
+    final viewModel = container.read(addTaskViewModelProvider.notifier);
+    await viewModel.submit('プロテイン', 'ソイ');
+
+    final state = container.read(addTaskViewModelProvider);
+    expect(state.submit.hasError, isTrue);
+    expect(state.submit.completed, isFalse);
+  });
 }
