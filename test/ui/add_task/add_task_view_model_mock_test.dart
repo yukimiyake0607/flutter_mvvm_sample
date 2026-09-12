@@ -49,4 +49,27 @@ void main() {
     // 呼ばれた回数もmockで確認（カウンター必要なし）
     verify(() => mock.createTask(title: 'プロテイン', note: 'ホエイ')).called(1);
   });
+
+  test('submitが失敗すると submit.hasErrorがtrueになる(mock)', () async {
+    final mock = MockTaskRepository();
+
+    when(
+      () => mock.createTask(
+        title: any(named: 'title'),
+        note: any(named: 'note'),
+      ),
+    ).thenAnswer((_) async => Result.error(Exception('失敗')));
+
+    final container = ProviderContainer(
+      overrides: [taskRepositoryProvider.overrideWithValue(mock)],
+    );
+    addTearDown(container.dispose);
+
+    final viewModel = container.read(addTaskViewModelProvider.notifier);
+    await viewModel.submit('プロテイン', '納豆も');
+
+    final state = container.read(addTaskViewModelProvider);
+    expect(state.submit.hasError, isTrue);
+    verify(() => mock.createTask(title: 'プロテイン', note: '納豆も')).called(1);
+  });
 }
