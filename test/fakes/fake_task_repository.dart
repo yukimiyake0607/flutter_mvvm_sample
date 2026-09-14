@@ -8,11 +8,13 @@ import 'package:flutter_mvvm_sample/utils/result.dart';
 /// 想定通り変化するかを調べる用のRepositoryです。
 /// ※調べるのは「Repository」が叩かれたかどうかではないです。
 class FakeTaskRepository implements TaskRepository {
-  FakeTaskRepository({this.shouldFail = false});
+  FakeTaskRepository({this.shouldFail = false, List<Task>? seed})
+    : _cache = seed ?? [];
 
-  List<Task>? _cache;
+  List<Task> _cache;
   bool shouldFail;
   int createCallCount = 0;
+  int getTasksCallCount = 0;
 
   @override
   Future<Result<Task>> createTask({
@@ -33,7 +35,7 @@ class FakeTaskRepository implements TaskRepository {
       isCompleted: false,
       createdAt: DateTime(2026, 1, 1),
     );
-    _cache = [...?_cache, task];
+    _cache = [..._cache, task];
     return Result.ok(task);
   }
 
@@ -50,9 +52,14 @@ class FakeTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<Result<List<Task>>> getTasks() {
-    // TODO: implement getTasks
-    throw UnimplementedError();
+  Future<Result<List<Task>>> getTasks() async {
+    getTasksCallCount++;
+
+    if (shouldFail) {
+      return Result.error(Exception('失敗'));
+    }
+
+    return Result.ok(List<Task>.from(_cache));
   }
 
   @override
