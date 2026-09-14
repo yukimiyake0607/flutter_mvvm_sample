@@ -11,9 +11,9 @@ import 'package:mocktail/mocktail.dart';
 class MockTaskRepository extends Mock implements TaskRepository {}
 
 /// createメソッドのテストに関してはFakeとMock両方のテストを追加しました。
-/// 
+///
 /// ここではMockでテストをしています。
-/// createメソッドは「空文字」の場合エラーを投げます。
+/// createメソッドは「空文字」の場合Result.errorを投げます。
 /// Mockでは「呼んだ・呼んでいない」をverify / verifyNeverで検証することができるので、
 /// 空文字テストはFakeRepositoryを作成するよりMockでやった方が楽です。
 /// ただし、Fakeは連続操作を検証する際に便利なのでトレードオフです。
@@ -74,6 +74,7 @@ void main() {
       overrides: [taskRepositoryProvider.overrideWithValue(mock)],
     );
     addTearDown(container.dispose);
+    container.listen(addTaskViewModelProvider, (_, _) {});
 
     final viewModel = container.read(addTaskViewModelProvider.notifier);
     await viewModel.submit('プロテイン', '納豆も');

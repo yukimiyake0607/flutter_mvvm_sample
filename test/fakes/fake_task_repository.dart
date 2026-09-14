@@ -6,7 +6,6 @@ import 'package:flutter_mvvm_sample/utils/result.dart';
 ///
 /// Fakeが結果（成功または失敗）を返した時に、ViewModelのstateが
 /// 想定通り変化するかを調べる用のRepositoryです。
-/// ※調べるのは「Repository」が叩かれたかどうかではないです。
 class FakeTaskRepository implements TaskRepository {
   FakeTaskRepository({this.shouldFail = false, List<Task>? seed})
     : _cache = seed ?? [];
