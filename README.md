@@ -62,3 +62,4 @@ ViewModelとRepositoryはmany-to-manyです。実際に3画面で `[taskReposito
 
 - 公式 Compass は `ChangeNotifier` + `provider` なのに、なぜ Riverpod にするか
 - MVVM の使い勝手のよさとデメリット
+- なぜテストではFakeを使っているのか？（Mockではないのか？）
