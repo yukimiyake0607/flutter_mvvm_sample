@@ -63,4 +63,43 @@ void main() {
     expect(state.load.hasError, isTrue);
     expect(state.tasks, isEmpty);
   });
+
+  test('フィルタをかけるとRepositoryは叩かず、filetedTasksだけ変わる', () async {
+    final fakeRepository = FakeTaskRepository(
+      seed: [
+        Task(
+          id: '1',
+          title: '仕事',
+          note: '会議',
+          isCompleted: false,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+        Task(
+          id: '2',
+          title: '散歩',
+          note: '朝30分',
+          isCompleted: true,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+    );
+
+    final container = ProviderContainer(
+      overrides: [taskRepositoryProvider.overrideWithValue(fakeRepository)],
+    );
+    addTearDown(container.dispose);
+    container.listen(taskListViewModelProvider, (_, _) {});
+
+    final viewModel = container.read(taskListViewModelProvider.notifier);
+    await viewModel.load();
+
+    int callCount = fakeRepository.getTasksCallCount;
+    viewModel.setFilter(TaskFilter.completed);
+
+    final state = container.read(taskListViewModelProvider);
+    expect(state.tasks.length, 2);
+    expect(state.filteredTasks.length, 1);
+    expect(state.filteredTasks.first.title, '散歩');
+    expect(fakeRepository.getTasksCallCount, callCount);
+  });
 }
