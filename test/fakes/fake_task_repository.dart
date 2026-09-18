@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter_mvvm_sample/data/repositories/task_repository.dart';
 import 'package:flutter_mvvm_sample/domain/models/task.dart';
 import 'package:flutter_mvvm_sample/utils/result.dart';
@@ -14,6 +16,7 @@ class FakeTaskRepository implements TaskRepository {
   bool shouldFail;
   int createCallCount = 0;
   int getTasksCallCount = 0;
+  int deleteCallCount = 0;
 
   @override
   Future<Result<Task>> createTask({
@@ -39,9 +42,14 @@ class FakeTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<Result<void>> deleteTask(String id) {
-    // TODO: implement deleteTask
-    throw UnimplementedError();
+  Future<Result<void>> deleteTask(String id) async {
+    if (shouldFail) {
+      return Result.error(Exception('失敗'));
+    }
+
+    _cache.where((task) => task.id != id).toList();
+    deleteCallCount++;
+    return Result.ok(null);
   }
 
   @override

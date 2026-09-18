@@ -102,4 +102,41 @@ void main() {
     expect(state.filteredTasks.first.title, '散歩');
     expect(fakeRepository.getTasksCallCount, callCount);
   });
+
+  test('deleteに成功すると、tasksのlengthが変わり、delete.completedがtrueになる', () async {
+    final fakeRepository = FakeTaskRepository(
+      seed: [
+        Task(
+          id: '1',
+          title: '仕事',
+          note: '会議',
+          isCompleted: false,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+        Task(
+          id: '2',
+          title: '散歩',
+          note: '朝30分',
+          isCompleted: true,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+    );
+
+    final container = ProviderContainer(
+      overrides: [taskRepositoryProvider.overrideWithValue(fakeRepository)],
+    );
+    addTearDown(container.dispose);
+    container.listen(taskListViewModelProvider, (_, _) {});
+
+    final viewModel = container.read(taskListViewModelProvider.notifier);
+    await viewModel.load();
+    await viewModel.deleteTask('1');
+
+    final state = container.read(taskListViewModelProvider);
+    expect(state.tasks.where((task) => task.title == '仕事').toList(), isEmpty);
+    expect(state.tasks.first.title, '散歩');
+    expect(state.tasks.length, 1);
+    expect(state.delete.completed, isTrue);
+  });
 }
