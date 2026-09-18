@@ -30,4 +30,13 @@ void main() {
     expect(tasks.first.note, '会議');
     expect(tasks.first.isCompleted, isFalse);
   });
+
+  test('getTasksでClientがthrowしたらResult.errorが返る', () async {
+    final client = FakeTaskApiClient(shouldFail: true);
+
+    final repository = TaskRepositoryRemote(client);
+    final result = await repository.getTasks();
+
+    expect(result, isA<Error<List<Task>>>());
+  });
 }
