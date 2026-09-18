@@ -64,7 +64,7 @@ void main() {
     expect(state.tasks, isEmpty);
   });
 
-  test('フィルタをかけるとRepositoryは叩かず、filetedTasksだけ変わる', () async {
+  test('フィルタをかけるとRepositoryは叩かず、filteredTasksだけ変わる', () async {
     final fakeRepository = FakeTaskRepository(
       seed: [
         Task(
