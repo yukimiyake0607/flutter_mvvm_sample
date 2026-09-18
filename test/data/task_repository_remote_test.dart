@@ -39,4 +39,24 @@ void main() {
 
     expect(result, isA<Error<List<Task>>>());
   });
+
+  test('getTasksを2回呼んでも、get成功後はキャッシュを返すため呼び出し回数は1回になる', () async {
+    final client = FakeTaskApiClient(
+      seed: [
+        TaskDto(
+          id: '1',
+          title: '仕事',
+          body: '会議',
+          completed: false,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+    );
+    final repository = TaskRepositoryRemote(client);
+
+    await repository.getTasks();
+    await repository.getTasks();
+
+    expect(client.fetchTasksCallCount, 1);
+  });
 }

@@ -72,6 +72,10 @@ class TaskRepositoryRemote implements TaskRepository {
   @override
   Future<Result<List<Task>>> getTasks() async {
     try {
+      if (_cache != null) {
+        return Result.ok(List<Task>.from(_cache!));
+      }
+
       final dtoTasks = await _taskApiClient.fetchTasks();
       final tasks = dtoTasks.map((dtoTask) => dtoTask.toDomain()).toList();
 
