@@ -35,4 +35,32 @@ void main() {
     expect(state.tasks.length, 1);
     expect(state.tasks.first.title, '仕事');
   });
+
+  test('loadが失敗すると loadのhasErrorがtrueになる', () async {
+    final fakeRepository = FakeTaskRepository(
+      seed: [
+        Task(
+          id: '1',
+          title: '仕事',
+          note: '会議',
+          isCompleted: false,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+      shouldFail: true,
+    );
+
+    final container = ProviderContainer(
+      overrides: [taskRepositoryProvider.overrideWithValue(fakeRepository)],
+    );
+    addTearDown(container.dispose);
+    container.listen(taskListViewModelProvider, (_, _) {});
+
+    final viewModel = container.read(taskListViewModelProvider.notifier);
+    await viewModel.load();
+
+    final state = container.read(taskListViewModelProvider);
+    expect(state.load.hasError, isTrue);
+    expect(state.tasks, isEmpty);
+  });
 }
