@@ -71,6 +71,11 @@ ViewModelとRepositoryはmany-to-manyです。実際に3画面で `[taskReposito
 | View（一覧のみ） | 同じ Fake | `ProviderScope` の `overrides` |
 | Repository | `FakeTaskApiClient` | コンストラクタ。Riverpod は使わない |
 
+### Fakeを選んだ理由（Mockではないか）
+公式Compassと同じくメモリ上のリストで実装したFakeを選択。
+どちらでもテストは書けるのですが、今回テストで確認したかったのは呼び出し回数より、**契約どおりに `Result` が返るか**と、リストが本当に増減するかです。
+※一部Fakeテストと比較するために`mocktail` は依存に残しています。
+
 ---
 
 ## 今後この README に足すこと
