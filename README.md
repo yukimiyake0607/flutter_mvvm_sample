@@ -58,6 +58,21 @@ ViewModelとRepositoryはmany-to-manyです。実際に3画面で `[taskReposito
 - `TaskDetailScreen` と `TaskDetailViewModel`
 - `AddTaskScreen` と `AddTaskViewModel`
 
+---
+
+## テスト
+
+層が分かれていることを示すために書きました。
+各テストは1つ下の層だけFakeする。（ViewModelのテストはRepositoryのみFakeにする）
+
+| 見る層 | 偽物 | 差し替え |
+|---|---|---|
+| ViewModel | `FakeTaskRepository` | `ProviderContainer` の `overrides` |
+| View（一覧のみ） | 同じ Fake | `ProviderScope` の `overrides` |
+| Repository | `FakeTaskApiClient` | コンストラクタ。Riverpod は使わない |
+
+---
+
 ## 今後この README に足すこと
 
 - 公式 Compass は `ChangeNotifier` + `provider` なのに、なぜ Riverpod にするか
