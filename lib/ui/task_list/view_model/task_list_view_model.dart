@@ -81,6 +81,7 @@ class TaskListViewModel extends Notifier<TaskListState> {
   ///
   /// 再試行はViewから呼んでよく、失敗時はtasksを空にしない。
   Future<void> load() async {
+    if (!ref.mounted) return;
     // loadの連打を阻止する
     if (state.load.running) return;
 
@@ -88,6 +89,7 @@ class TaskListViewModel extends Notifier<TaskListState> {
 
     final repository = ref.read(taskRepositoryProvider);
     final result = await repository.getTasks();
+    if (!ref.mounted) return;
     switch (result) {
       case Ok(:final value):
         state = state.copyWith(
@@ -109,6 +111,8 @@ class TaskListViewModel extends Notifier<TaskListState> {
 
     state = state.copyWith(delete: CommandState(running: true));
     final result = await ref.read(taskRepositoryProvider).deleteTask(id);
+
+    if (!ref.mounted) return;
 
     switch (result) {
       case Ok():
