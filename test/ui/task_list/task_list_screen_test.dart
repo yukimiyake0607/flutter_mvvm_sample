@@ -31,4 +31,36 @@ void main() {
 
     expect(find.text('仕事'), findsOneWidget);
   });
+
+  testWidgets('loadに失敗すると「データの取得に失敗しました」と表示され、再試行すると成功する', (tester) async {
+    final fakeRepository = FakeTaskRepository(
+      seed: [
+        Task(
+          id: '1',
+          title: '仕事',
+          note: '会議',
+          isCompleted: false,
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+      shouldFail: true,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [taskRepositoryProvider.overrideWithValue(fakeRepository)],
+        child: MaterialApp(home: TaskListScreen()),
+      ),
+    );
+    await tester.pump(Duration(milliseconds: 1));
+
+    expect(find.text('データの取得に失敗しました'), findsOneWidget);
+
+    fakeRepository.shouldFail = false;
+
+    await tester.tap(find.text('再試行'));
+    await tester.pump(Duration(milliseconds: 1));
+
+    expect(find.text('仕事'), findsOneWidget);
+  });
 }
