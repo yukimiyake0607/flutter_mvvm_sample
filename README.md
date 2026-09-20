@@ -31,7 +31,7 @@ ViewModelとRepositoryはmany-to-manyです。実際に3画面の ViewModel が�
 
 公式 MVVM の Data（Model） 層は **Service** と **Repository** に分かれます。
 
-- `TaskApiClient`（`[lib/data/services/task_api_client.dart](lib/data/services/task_api_client.dart)`）  
+- `TaskApiClient` （`[lib/data/services/task_api_client.dart](lib/data/services/task_api_client.dart)`）  
   アプリの外を 1 クラスに閉じます。本番なら HTTP、今はサーバーがないので遅延つきのインメモリです。返すのは `TaskDto` と例外だけ。
   ここに模擬DBも管理してます。（DB・サーバーがないので、実務では管理しないものも含まれてます）
 - `TaskRepository`
@@ -52,9 +52,9 @@ ViewModelとRepositoryはmany-to-manyです。実際に3画面の ViewModel が�
 今回は少々無理やり、note ↔︎ body、isCompleted ↔︎ completed と変化させています。
 2 つに分けることで、API の都合を UI まで漏らさないようにでき、サーバーが JSON のキーを変えても、直すのは DTO と変換だけにできます。ただ、1に対して管理するモデルが2つになるので、実務の際は規模感などを基にトレードオフで導入検討すべきです。
 
-- `Task`（`[lib/domain/models/task.dart](lib/domain/models/task.dart)`）  
+- `Task` （`[lib/domain/models/task.dart](lib/domain/models/task.dart)`）  
   画面と ViewModel が見るモデルです。フィールドはアプリの言葉（`note` / `isCompleted`）です。不変で、更新は `copyWith` 。
-- `TaskDto`（`[lib/data/model/task_dto.dart](lib/data/model/task_dto.dart)`）  
+- `TaskDto` （`[lib/data/model/task_dto.dart](lib/data/model/task_dto.dart)`）  
   API の形。実務ではレスポンス名とドメイン名がずれることが多いので、意図的に `body` / `completed` にしています。変換（`toDomain` / `fromDomain`）は Data 層に閉じ、ViewModel は `Task` だけを見る。
 
 ---
