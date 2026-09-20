@@ -13,6 +13,39 @@ View は Repository を知りません。ViewModel は Service も DTO も知り
 
 ---
 
+## UI層（MVVMのViewとViewModel）
+
+公式 MVVM の UI層は **View** と **ViewModel** に分かれています。
+また、View と ViewModelは1：1にしています。つまり、ViewModelを複数のViewで使用することはしません。
+ViewはnavigationやSnackBarなど、`context` が必要な処理を担当します。RepositoryとのやりとりはViewModelに任せます。
+View が [`taskRepositoryProvider`](lib/data/providers/task_repository_provider.dart) を watch / read してはいけません。Riverpod の `Provider` は DI、`Notifier` は画面の状態です。View が Repository を見ると ViewModel を飛ばし、層の境界と「1つ下だけ Fake」するテストが壊れます。<br>
+ViewModelとRepositoryはmany-to-manyです。実際に3画面の ViewModel が同じ `taskRepositoryProvider` を呼び出しています。
+
+- `TaskListScreen` と `TaskListViewModel`
+- `TaskDetailScreen` と `TaskDetailViewModel`
+- `AddTaskScreen` と `AddTaskViewModel`
+
+---
+
+## Data層（MVVMのModel層）
+
+公式 MVVM の Data（Model） 層は **Service** と **Repository** に分かれます。
+
+- `TaskApiClient`（`[lib/data/services/task_api_client.dart](lib/data/services/task_api_client.dart)`）  
+  アプリの外を 1 クラスに閉じます。本番なら HTTP、今はサーバーがないので遅延つきのインメモリです。返すのは `TaskDto` と例外だけ。
+  ここに模擬DBも管理してます。（DB・サーバーがないので、実務では管理しないものも含まれてます）
+- `TaskRepository`
+  アプリ内の正です。Client を呼び、DTO を `Task` に変え、失敗を `Result` に変え、キャッシュします。ViewModelとのやりとりはここで。
+
+---
+
+## Domain層（Usecase）は置かない
+
+公式では任意の層となっています。
+複数Repositoryをまたぐとき、複雑な処理や複数のViewModelで再利用する時に足しますが、このリポジトリでは必要ないので足していません。
+
+---
+
 ## ドメインモデルと API モデル
 
 モデルはDomain・Dtoの2つを用意。
@@ -32,39 +65,6 @@ View は Repository を知りません。ViewModel は Service も DTO も知り
   Data 層とのやり取りでは例外を画面まで投げずに、Resultクラスで表現。
 - `CommandState`（`[lib/utils/command_state.dart](lib/utils/command_state.dart)`）  
   1 画面に「読み込み」と「削除」のように操作が複数あるときは、CommandStateで複数の状態を管理できるようにしています。公式 Compass の Command と同じ役割ですが、`ChangeNotifier` にはせず、Riverpod が差し替える不変値にします。
-
----
-
-## Data層（MVVMのModel層）
-
-公式 MVVM の Data（Model） 層は **Service** と **Repository** に分かれます。
-
-- `TaskApiClient`（`[lib/data/services/task_api_client.dart](lib/data/services/task_api_client.dart)`）  
-  アプリの外を 1 クラスに閉じます。本番なら HTTP、今はサーバーがないので遅延つきのインメモリです。返すのは `TaskDto` と例外だけ。
-  ここに模擬DBも管理してます。（DB・サーバーがないので、実務では管理しないものも含まれてます）
-- `TaskRepository`
-  アプリ内の正です。Client を呼び、DTO を `Task` に変え、失敗を `Result` に変え、キャッシュします。ViewModelとのやりとりはここで。
-
----
-
-## UI層（MVVMのViewとViewModel）
-
-公式 MVVM の UI層は **View** と **ViewModel** に分かれています。
-また、View と ViewModelは1：1にしています。つまり、ViewModelを複数のViewで使用することはしません。
-ViewはnavigationやSnackBarなど、`context` が必要な処理を担当します。RepositoryとのやりとりはViewModelに任せます。
-View が [`taskRepositoryProvider`](lib/data/providers/task_repository_provider.dart) を watch / read してはいけません。Riverpod の `Provider` は DI、`Notifier` は画面の状態です。View が Repository を見ると ViewModel を飛ばし、層の境界と「1つ下だけ Fake」するテストが壊れます。<br>
-ViewModelとRepositoryはmany-to-manyです。実際に3画面の ViewModel が同じ `taskRepositoryProvider` を呼び出しています。
-
-- `TaskListScreen` と `TaskListViewModel`
-- `TaskDetailScreen` と `TaskDetailViewModel`
-- `AddTaskScreen` と `AddTaskViewModel`
-
----
-
-## Domain層（Usecase）は置かない
-
-公式では任意の層となっています。
-複数Repositoryをまたぐとき、複雑な処理や複数のViewModelで再利用する時に足しますが、このリポジトリでは必要ないので足していません。
 
 ---
 
