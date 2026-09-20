@@ -31,7 +31,7 @@ ViewModelとRepositoryはmany-to-manyです。実際に3画面の ViewModel が�
 
 公式 MVVM の Data（Model） 層は **Service** と **Repository** に分かれます。
 
-- `TaskApiClient`（`[lib/data/services/task_api_client.dart](lib/data/services/task_api_client.dart)`）  
+- [`TaskApiClient` ](lib/data/services/task_api_client.dart)  
   アプリの外を 1 クラスに閉じます。本番なら HTTP、今はサーバーがないので遅延つきのインメモリです。返すのは `TaskDto` と例外だけ。
   ここに模擬DBも管理してます。（DB・サーバーがないので、実務では管理しないものも含まれてます）
 - `TaskRepository`
@@ -52,18 +52,18 @@ ViewModelとRepositoryはmany-to-manyです。実際に3画面の ViewModel が�
 今回は少々無理やり、note ↔︎ body、isCompleted ↔︎ completed と変化させています。
 2 つに分けることで、API の都合を UI まで漏らさないようにでき、サーバーが JSON のキーを変えても、直すのは DTO と変換だけにできます。ただ、1に対して管理するモデルが2つになるので、実務の際は規模感などを基にトレードオフで導入検討すべきです。
 
-- `Task`（`[lib/domain/models/task.dart](lib/domain/models/task.dart)`）  
+- [`Task`](lib/domain/models/task.dart)
   画面と ViewModel が見るモデルです。フィールドはアプリの言葉（`note` / `isCompleted`）です。不変で、更新は `copyWith` 。
-- `TaskDto`（`[lib/data/model/task_dto.dart](lib/data/model/task_dto.dart)`）  
+- [`TaskDto`](lib/data/model/task_dto.dart)
   API の形。実務ではレスポンス名とドメイン名がずれることが多いので、意図的に `body` / `completed` にしています。変換（`toDomain` / `fromDomain`）は Data 層に閉じ、ViewModel は `Task` だけを見る。
 
 ---
 
 ## 成功・失敗と、操作ごとの進行
 
-- `Result`（`[lib/utils/result.dart](lib/utils/result.dart)`）  
+- [`Result`](lib/utils/result.dart)
   Data 層とのやり取りでは例外を画面まで投げずに、Resultクラスで表現。
-- `CommandState`（`[lib/utils/command_state.dart](lib/utils/command_state.dart)`）  
+- [`CommandState`](lib/utils/command_state.dart)
   1 画面に「読み込み」と「削除」のように操作が複数あるときは、CommandStateで複数の状態を管理できるようにしています。公式 Compass の Command と同じ役割ですが、`ChangeNotifier` にはせず、Riverpod が差し替える不変値にします。
 
 ---
@@ -103,6 +103,20 @@ ViewModel は `TaskRepository` しか知らないので、ViewModel テストで
 
 ---
 
-## 今後この README に足すこと
+## MVVMの所感
 
-- MVVM の使い勝手のよさとデメリット
+### 使い勝手の良さ
+
+「UIである View」と「状態と操作を持つ ViewModel」に切ることで、ロジックが Widget に漏れにくく、層ごとにテストしやすかったです。<br>
+呼び出す側が下の層のインスタンスを用意するのではなく、Provider が組み立ててコンストラクタで渡すのでテストで1 つ下だけ Fake に差し替えられます。<br>
+Riverpod の `NotifierProvider` があるので、ViewModel作成の容易性もありFlutter との相性はいいと思いました。<br>
+公式が勧めているかつ、実務の状態管理とも載せやすいのが現場でよく見る理由だと思います。<br>
+※MVCはWidgetにロジックが寄りやすいので、個人的にはMVVMの方が好みです。
+
+### デメリット
+
+正直この規模のアプリであればMVVMのデメリットは感じにくいです。ただし、出てくるとしたら次のような点かと思います。
+
+- ファイルと手順が増える：画面を1つ足すとView、ViewModel、Stateなどが一気に増えます。小さな機能の場合過剰になりそう。
+- 1 つの変更が複数ファイルに飛ぶ：層を切っているために画面の項目追加で DTO・Domain・Repository・ViewModel・View にまたがることがありそう。
+- ViewModel が厚くなりやすい： 複数 Repository をまたぐ処理や、複数画面で同じ業務ルールが必要になると、公式は UseCase（Domain 層）を検討しろと言ってます。その見極め基準をチーム内でコーディング規約等（今だとrulesで検知できますが）で共有しないと、少しずつ崩れていきます。
