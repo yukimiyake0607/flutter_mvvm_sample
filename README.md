@@ -108,8 +108,8 @@ ViewModel は `TaskRepository` しか知らないので、ViewModel テストで
 ### 使い勝手の良さ
 
 「UIである View」と「状態と操作を持つ ViewModel」に切ることで、ロジックが Widget に漏れにくく、層ごとにテストしやすかったです。<br>
-呼び出す側が下の層のインスタンスを用意するのではなく、Provider が組み立ててコンストラクタで渡します。そのおかげで、テストでは 1 つ下だけ Fake に差し替えられます。<br>
-Riverpod の `NotifierProvider` なら ViewModelの容易性もあるので、Flutter との相性はいいと思いました。<br>
+呼び出す側が下の層のインスタンスを用意するのではなく、Provider が組み立ててコンストラクタで渡すのでテストで1 つ下だけ Fake に差し替えられます。<br>
+Riverpod の `NotifierProvider` があるので、ViewModel作成の容易性もありFlutter との相性はいいと思いました。<br>
 公式が勧めているかつ、実務の状態管理とも載せやすいのが現場でよく見る理由だと思います。<br>
 ※MVCはWidgetにロジックが寄りやすいので、個人的にはMVVMの方が好みです。
 
