@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 ///
 /// テストでFakeに差し替えるため返す型は[TaskRepository]としています。
 /// 画面を閉じてキャッシュが消えるのは困るので、autoDisposeにはしていません。
-/// 
+///
 /// 公式Flutterアーキテクチャと同様に、層と層はコンストラクタ渡しでDIしています。
 /// その証拠に[TaskRepositoryRemote]はClientの作り方を知りません。
 /// ※依存を自分で作らず、外からもらう
