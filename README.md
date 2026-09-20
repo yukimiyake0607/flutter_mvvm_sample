@@ -13,6 +13,39 @@ View は Repository を知りません。ViewModel は Service も DTO も知り
 
 ---
 
+## UI層（MVVMのViewとViewModel）
+
+公式 MVVM の UI層は **View** と **ViewModel** に分かれています。
+また、View と ViewModelは1：1にしています。つまり、ViewModelを複数のViewで使用することはしません。
+ViewはnavigationやSnackBarなど、`context` が必要な処理を担当します。RepositoryとのやりとりはViewModelに任せます。
+View が [`taskRepositoryProvider`](lib/data/providers/task_repository_provider.dart) を watch / read してはいけません。Riverpod の `Provider` は DI、`Notifier` は画面の状態です。View が Repository を見ると ViewModel を飛ばし、層の境界と「1つ下だけ Fake」するテストが壊れます。<br>
+ViewModelとRepositoryはmany-to-manyです。実際に3画面の ViewModel が同じ `taskRepositoryProvider` を呼び出しています。
+
+- `TaskListScreen` と `TaskListViewModel`
+- `TaskDetailScreen` と `TaskDetailViewModel`
+- `AddTaskScreen` と `AddTaskViewModel`
+
+---
+
+## Data層（MVVMのModel層）
+
+公式 MVVM の Data（Model） 層は **Service** と **Repository** に分かれます。
+
+- `TaskApiClient`（`[lib/data/services/task_api_client.dart](lib/data/services/task_api_client.dart)`）  
+  アプリの外を 1 クラスに閉じます。本番なら HTTP、今はサーバーがないので遅延つきのインメモリです。返すのは `TaskDto` と例外だけ。
+  ここに模擬DBも管理してます。（DB・サーバーがないので、実務では管理しないものも含まれてます）
+- `TaskRepository`
+  アプリ内の正です。Client を呼び、DTO を `Task` に変え、失敗を `Result` に変え、キャッシュします。ViewModelとのやりとりはここで。
+
+---
+
+## Domain層（Usecase）は置かない
+
+公式では任意の層となっています。
+複数Repositoryをまたぐとき、複雑な処理や複数のViewModelで再利用する時に足しますが、このリポジトリでは必要ないので足していません。
+
+---
+
 ## ドメインモデルと API モデル
 
 モデルはDomain・Dtoの2つを用意。
@@ -35,28 +68,18 @@ View は Repository を知りません。ViewModel は Service も DTO も知り
 
 ---
 
-## Data層（MVVMのModel層）
+## 公式 Compass との差分
 
-公式 MVVM の Data（Model） 層は **Service** と **Repository** に分かれます。
+責務とデータの矢印（View → ViewModel → Repository → Service）は公式どおりです。差し替えているのは状態管理と DI の手段だけです。
 
-- `TaskApiClient`（`[lib/data/services/task_api_client.dart](lib/data/services/task_api_client.dart)`）  
-  アプリの外を 1 クラスに閉じます。本番なら HTTP、今はサーバーがないので遅延つきのインメモリです。返すのは `TaskDto` と例外だけ。
-  ここに模擬DBも管理してます。（DB・サーバーがないので、実務では管理しないものも含まれてます）
-- `TaskRepository`
-  アプリ内の正です。Client を呼び、DTO を `Task` に変え、失敗を `Result` に変え、キャッシュします。ViewModelとのやりとりはここで。
+| 箇所       | 公式 Compass                            | このリポジトリ                              |
+| ---------- | --------------------------------------- | ------------------------------------------- |
+| 状態の購読 | `ChangeNotifier` + `ListenableBuilder`  | `Notifier` + `ref.watch`                    |
+| DI         | `package:provider` のコンストラクタ注入 | Riverpod の `Provider` / `NotifierProvider` |
+| Command    | `Command` が `ChangeNotifier`           | 不変値の `CommandState`                     |
 
----
-
-## UI層（MVVMのViewとViewModel）
-
-公式 MVVM の UI層は **View** と **ViewModel** に分かれています。
-また、View と ViewModelは1：1にしています。つまり、ViewModelを複数のViewで使用することはしません。
-Viewはnavigationなどを担当しますが、RepositoryとのやりとりはViewModelに任せます。
-ViewModelとRepositoryはmany-to-manyです。実際に3画面で `[taskRepositoryProvider](lib/data/providers/task_repository_provider.dart)` を呼び出してます。
-
-- `TaskListScreen` と `TaskListViewModel`
-- `TaskDetailScreen` と `TaskDetailViewModel`
-- `AddTaskScreen` と `AddTaskViewModel`
+公式 Compass は `ChangeNotifier` + `provider` なのに Riverpod にする理由は、実務ではほとんどChangeNotifierを使用しないからなのと、DIと状態管理をまとめてできるためです。
+層の役割は変えず、View が状態を購読する手段だけを替えます。`ChangeNotifier` と Riverpod を混在させません。
 
 ---
 
@@ -64,21 +87,22 @@ ViewModelとRepositoryはmany-to-manyです。実際に3画面で `[taskReposito
 
 層が分かれていることを示すために書きました。
 各テストは1つ下の層だけFakeする。（ViewModelのテストはRepositoryのみFakeにする）
+ViewModel は `TaskRepository` しか知らないので、ViewModel テストで override するのは `taskRepositoryProvider` です。`FakeTaskApiClient` は Repository テスト用で、ViewModel テストには不要です。ViewModel が Service まで知ると両方の Fake が必要になり、テストが複雑になります。
 
-| 見る層 | 偽物 | 差し替え |
-|---|---|---|
-| ViewModel | `FakeTaskRepository` | `ProviderContainer` の `overrides` |
-| View（一覧のみ） | 同じ Fake | `ProviderScope` の `overrides` |
-| Repository | `FakeTaskApiClient` | コンストラクタ。Riverpod は使わない |
+| 見る層           | 偽物                 | 差し替え                            |
+| ---------------- | -------------------- | ----------------------------------- |
+| ViewModel        | `FakeTaskRepository` | `ProviderContainer` の `overrides`  |
+| View（一覧のみ） | 同じ Fake            | `ProviderScope` の `overrides`      |
+| Repository       | `FakeTaskApiClient`  | コンストラクタ。Riverpod は使わない |
 
 ### Fakeを選んだ理由（Mockではないか）
+
 公式Compassと同じくメモリ上のリストで実装したFakeを選択。
-どちらでもテストは書けるのですが、今回テストで確認したかったのは呼び出し回数より、**契約どおりに `Result` が返るか**と、リストが本当に増減するかです。
+どちらでもテストは書けるのですが、今回テストで確認したかったのは呼び出し回数より、**契約どおりに `Result` が返るか**と、リストが本当に増減するかです。<br>
 ※一部Fakeテストと比較するために`mocktail` は依存に残しています。
 
 ---
 
 ## 今後この README に足すこと
 
-- 公式 Compass は `ChangeNotifier` + `provider` なのに、なぜ Riverpod にするか
 - MVVM の使い勝手のよさとデメリット
